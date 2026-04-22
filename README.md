@@ -12,6 +12,7 @@ A tiny, self-hosted RSS filter proxy with a visual rule builder, multiple rules 
 
 - **Visual rule builder** — point-and-click filter creation, no YAML or config files
 - **Unlimited rules with nested logic** — other tools give you one filter per feed. RSS Griddle gives you as many as you need, organized into logic groups (AND/OR/NOR) with group-level logic on top — two levels of nesting.
+- **Custom XML field support** — filter on any tag in the feed, not just title and description. If the feed has `<location>`, `<workmode>`, `<salary>`, or any other custom XML tag, you can build rules on it. Most RSS tools silently drop these fields — RSS Griddle preserves and exposes them.
 - **Tiny and focused** — ~650 lines of Go, no database, no framework — just a binary that filters feeds. Starts in milliseconds, runs on anything.
 - **Pre-filter at the source** — filter once at the root, get clean signal everywhere downstream.
 - **Mobile-friendly** — manage filters from your phone
@@ -74,6 +75,24 @@ The app listens on port `4080`. Data is a single JSON file — no database requi
 
 When running the binary directly (not Docker), set `DATA_FILE` to a writable path — the default `/data/feeds.json` assumes a Docker volume mount.
 
+## Architecture
+
+Single-file Go app (`main.go`, ~650 lines) with no external framework:
+
+```
+Browser ──> Go HTTP server (:4080)
+              ├── GET /              → UI: feed list + rule builder form
+              ├── POST /feeds        → Create feed config
+              ├── GET /feeds/{name}  → Filtered RSS XML output
+              └── JSON file (/data/feeds.json)
+```
+
+**Filter engine:** Rules are compiled into [expr-lang](https://github.com/expr-lang/expr) expressions at request time. Each feed item is evaluated against the compiled expression — items that match pass through, the rest are dropped. The output is standard RSS 2.0 XML via [gorilla/feeds](https://github.com/gorilla/feeds).
+
+**Feed parsing:** [gofeed](https://github.com/mmcdole/gofeed) parses upstream RSS/Atom feeds and — critically — preserves non-namespaced custom XML tags in `Item.Custom`. This is the technical foundation that makes custom field filtering possible; most RSS parsers silently discard these tags.
+
+**Frontend:** Server-rendered Go templates with [HTMX](https://htmx.org) for dynamic form interactions and [terminal.css](https://terminalcss.xyz) for styling. No build step, no npm.
+
 ## FAQ
 
 **Q: I get an error when saving a feed?**
@@ -97,6 +116,23 @@ A griddle is a miner's sieve — a nod to the data-miner-like level of control t
 ## Why I Built This
 
 I built RSS Griddle as part of a personal newspaper project — a daily email that pulls from RSS feeds, job boards, and local news. I needed to filter job feeds by custom XML fields like work mode and location, but every existing tool was either broken, SaaS-only, or couldn't read custom XML tags. It turned out Go's `gofeed` library was the only parser that preserves them, so I built a small filter proxy around it. I'm sharing it because the SaaS tools that used to do this (SiftRSS, FeedRinse, FeedSifter) are all gone, and self-hosters deserve a visual rule builder that works on real-world feeds.
+
+## Credits
+
+**Dependencies:**
+- [gofeed](https://github.com/mmcdole/gofeed) — RSS/Atom parser that preserves custom XML tags
+- [expr-lang](https://github.com/expr-lang/expr) — expression language for filter evaluation
+- [gorilla/feeds](https://github.com/gorilla/feeds) — RSS 2.0 XML output
+- [HTMX](https://htmx.org) — dynamic form interactions without JavaScript frameworks
+- [terminal.css](https://terminalcss.xyz) — minimal terminal-style CSS
+
+**Inspiration:**
+- [rss-funnel](https://github.com/shouya/rss-funnel) — powerful RSS proxy, but YAML-only and drops custom XML tags
+- [rverst/rss-filter](https://github.com/rverst/rss-filter) — Go RSS proxy with expression syntax, but no UI or persistence
+
+---
+
+Made with &hearts; by [James Coulter](https://www.jamesandrewscoulter.com) · [GitHub](https://github.com/james-andrews-coulter/rss-griddle)
 
 ## License
 

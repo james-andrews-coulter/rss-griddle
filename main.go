@@ -278,7 +278,7 @@ var indexTmpl = template.Must(template.New("index").Funcs(template.FuncMap{
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body class="terminal">
-<main>
+<main class="container">
 <h1>RSS Griddle</h1>
 
 <section id="feed-form">
@@ -302,7 +302,6 @@ var indexTmpl = template.Must(template.New("index").Funcs(template.FuncMap{
 <p>No feeds yet.</p>
 {{end}}
 </section>
-</main>
 
 <script>
 document.addEventListener("submit", function(e) {
@@ -359,6 +358,10 @@ new MutationObserver(updateVisibility).observe(
 );
 updateVisibility();
 </script>
+<footer style="margin-top:calc(var(--global-space) * 4);opacity:0.6;font-size:0.85em">
+<p>Made with &hearts; by <a href="https://www.jamesandrewscoulter.com">James Coulter</a> · <a href="https://github.com/james-andrews-coulter/rss-griddle">GitHub</a></p>
+</footer>
+</main>
 </body>
 </html>
 
