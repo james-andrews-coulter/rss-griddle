@@ -38,6 +38,7 @@ type Rule struct {
 // --- Persistence ---
 
 var dataFile = "/data/feeds.json"
+var port = "4080"
 
 func loadFeeds() ([]Feed, error) {
 	data, err := os.ReadFile(dataFile)
@@ -632,6 +633,9 @@ func main() {
 	if v := os.Getenv("DATA_FILE"); v != "" {
 		dataFile = v
 	}
+	if v := os.Getenv("PORT"); v != "" {
+		port = v
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", handleIndex)
 	mux.HandleFunc("POST /feeds", handleCreate)
@@ -643,6 +647,6 @@ func main() {
 	mux.HandleFunc("GET /health", handleHealth)
 	mux.HandleFunc("GET /partials/group", handlePartialGroup)
 	mux.HandleFunc("GET /partials/rule", handlePartialRule)
-	log.Println("rss-griddle listening on :4080")
-	log.Fatal(http.ListenAndServe(":4080", mux))
+	log.Printf("rss-griddle listening on :%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
