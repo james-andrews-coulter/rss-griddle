@@ -273,13 +273,13 @@ var indexTmpl = template.Must(template.New("index").Funcs(template.FuncMap{
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RSS Filter</title>
+<title>RSS Griddle</title>
 <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.5/dist/terminal.min.css">
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body class="terminal">
 <main>
-<h1>RSS Filter</h1>
+<h1>RSS Griddle</h1>
 
 <section id="feed-form">
 {{template "form" .}}
@@ -628,6 +628,6 @@ func main() {
 	mux.HandleFunc("GET /health", handleHealth)
 	mux.HandleFunc("GET /partials/group", handlePartialGroup)
 	mux.HandleFunc("GET /partials/rule", handlePartialRule)
-	log.Println("rss-filter listening on :4080")
+	log.Println("rss-griddle listening on :4080")
 	log.Fatal(http.ListenAndServe(":4080", mux))
 }

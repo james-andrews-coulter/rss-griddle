@@ -1,4 +1,4 @@
-module rss-filter
+module rss-griddle
 
 go 1.25.5
 
